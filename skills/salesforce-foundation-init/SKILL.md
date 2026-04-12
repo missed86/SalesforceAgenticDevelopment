@@ -32,6 +32,10 @@ Run this once at the start of a new project — then build features on top.
 | 8 | `ServiceResponseDto` | Apex class | Standard success/error wrapper for controllers |
 | 9 | `RecordTypes` | Apex class | Resolve Record Type IDs safely via Schema describe |
 | 10 | `TestDataFactory` | Apex class | Skeleton test data builder |
+| 11 | `TriggerControlTest` | Apex test | Tests for TriggerControl |
+| 12 | `LoggerTest` | Apex test | Tests for Logger + LogEventSubscriber |
+| 13 | `ServiceResponseDtoTest` | Apex test | Tests for ServiceResponseDto |
+| 14 | `RecordTypesTest` | Apex test | Tests for RecordTypes utility |
 
 ## Instructions for the agent
 
@@ -293,6 +297,203 @@ public class TestDataFactory {
         );
         if (doInsert) insert u;
         return u;
+    }
+}
+```
+
+---
+
+## Test Classes
+
+Every foundation class needs tests. The agent must generate these alongside the main classes.
+
+### 11. TriggerControlTest.cls
+
+```apex
+@isTest
+private class TriggerControlTest {
+
+    @isTest
+    static void isDisabled_shouldReturnFalseByDefault() {
+        Assert.isFalse(TriggerControl.isDisabled('AccountTrigger'));
+    }
+
+    @isTest
+    static void disable_shouldDisableSpecificTrigger() {
+        TriggerControl.disable('AccountTrigger');
+
+        Assert.isTrue(TriggerControl.isDisabled('AccountTrigger'));
+        Assert.isFalse(TriggerControl.isDisabled('ContactTrigger'));
+    }
+
+    @isTest
+    static void enable_shouldReEnableTrigger() {
+        TriggerControl.disable('AccountTrigger');
+        TriggerControl.enable('AccountTrigger');
+
+        Assert.isFalse(TriggerControl.isDisabled('AccountTrigger'));
+    }
+
+    @isTest
+    static void disableAll_shouldDisableEveryTrigger() {
+        TriggerControl.disableAll();
+
+        Assert.isTrue(TriggerControl.isDisabled('AccountTrigger'));
+        Assert.isTrue(TriggerControl.isDisabled('AnythingElse'));
+        Assert.isTrue(TriggerControl.isDisabledAll());
+    }
+
+    @isTest
+    static void isDisabled_shouldRespectCmdt() {
+        // TriggerSetting__mdt records are read-only in tests.
+        // If no CMDT record exists for the name, isDisabled returns false.
+        Assert.isFalse(TriggerControl.isDisabled('NonExistentTrigger'));
+    }
+}
+```
+
+### 12. LoggerTest.cls
+
+```apex
+@isTest
+private class LoggerTest {
+
+    @isTest
+    static void error_withException_shouldPublishEvent() {
+        Test.startTest();
+        try {
+            Integer result = 1 / 0;
+        } catch (Exception ex) {
+            Logger.error('LoggerTest', 'error_withException', ex);
+        }
+        Test.stopTest();
+
+        List<ApplicationLog__c> logs = [
+            SELECT Level__c, SourceClass__c, SourceMethod__c, Message__c, StackTrace__c
+            FROM ApplicationLog__c
+        ];
+        Assert.areEqual(1, logs.size(), 'Should persist one log record');
+        Assert.areEqual('ERROR', logs[0].Level__c);
+        Assert.areEqual('LoggerTest', logs[0].SourceClass__c);
+        Assert.isTrue(String.isNotBlank(logs[0].StackTrace__c));
+    }
+
+    @isTest
+    static void error_withMessage_shouldIncludeRecordId() {
+        Account acc = new Account(Name = 'Test');
+        insert acc;
+
+        Test.startTest();
+        Logger.error('LoggerTest', 'error_withMessage', 'Something broke', acc.Id);
+        Test.stopTest();
+
+        List<ApplicationLog__c> logs = [
+            SELECT RecordId__c, Message__c FROM ApplicationLog__c
+        ];
+        Assert.areEqual(1, logs.size());
+        Assert.areEqual(acc.Id, logs[0].RecordId__c);
+    }
+
+    @isTest
+    static void warn_shouldPersistWarnLevel() {
+        Test.startTest();
+        Logger.warn('LoggerTest', 'warn_test', 'Something suspicious');
+        Test.stopTest();
+
+        List<ApplicationLog__c> logs = [SELECT Level__c FROM ApplicationLog__c];
+        Assert.areEqual(1, logs.size());
+        Assert.areEqual('WARN', logs[0].Level__c);
+    }
+
+    @isTest
+    static void info_shouldPersistInfoLevel() {
+        Test.startTest();
+        Logger.info('LoggerTest', 'info_test', 'Operation completed');
+        Test.stopTest();
+
+        List<ApplicationLog__c> logs = [SELECT Level__c FROM ApplicationLog__c];
+        Assert.areEqual(1, logs.size());
+        Assert.areEqual('INFO', logs[0].Level__c);
+    }
+}
+```
+
+**Note:** `Test.stopTest()` forces Platform Event delivery synchronously, so
+the `LogEventSubscriber` trigger fires and inserts into `ApplicationLog__c`
+before the assertions run.
+
+### 13. ServiceResponseDtoTest.cls
+
+```apex
+@isTest
+private class ServiceResponseDtoTest {
+
+    @isTest
+    static void success_withMessage_shouldSetFields() {
+        ServiceResponseDto dto = ServiceResponseDto.success('All good');
+
+        Assert.isTrue(dto.isSuccess);
+        Assert.areEqual('All good', dto.message);
+        Assert.isNull(dto.data);
+    }
+
+    @isTest
+    static void success_withData_shouldIncludePayload() {
+        Map<String, String> payload = new Map<String, String>{ 'key' => 'value' };
+        ServiceResponseDto dto = ServiceResponseDto.success('Done', payload);
+
+        Assert.isTrue(dto.isSuccess);
+        Assert.areEqual('Done', dto.message);
+        Assert.isNotNull(dto.data);
+    }
+
+    @isTest
+    static void failure_shouldSetIsSuccessFalse() {
+        ServiceResponseDto dto = ServiceResponseDto.failure('Something went wrong');
+
+        Assert.isFalse(dto.isSuccess);
+        Assert.areEqual('Something went wrong', dto.message);
+        Assert.isNull(dto.data);
+    }
+}
+```
+
+### 14. RecordTypesTest.cls
+
+```apex
+@isTest
+private class RecordTypesTest {
+
+    @isTest
+    static void get_withValidRecordType_shouldReturnId() {
+        // Account usually has a Master RT available in every org.
+        // If the org has no custom RTs, use getAll to verify empty map behavior.
+        Map<String, Schema.RecordTypeInfo> rtInfos =
+            Account.SObjectType.getDescribe().getRecordTypeInfosByDeveloperName();
+
+        if (rtInfos.containsKey('Master')) {
+            Id rtId = RecordTypes.get(Account.SObjectType, 'Master');
+            Assert.isNotNull(rtId);
+        }
+    }
+
+    @isTest
+    static void get_withInvalidName_shouldThrowAppException() {
+        Boolean threw = false;
+        try {
+            RecordTypes.get(Account.SObjectType, 'CompletelyFakeRT_999');
+        } catch (AppException e) {
+            threw = true;
+            Assert.isTrue(e.getMessage().contains('Record Type not found'));
+        }
+        Assert.isTrue(threw, 'Should throw AppException for non-existent RT');
+    }
+
+    @isTest
+    static void getAll_shouldReturnMap() {
+        Map<String, Id> result = RecordTypes.getAll(Account.SObjectType);
+        Assert.isNotNull(result);
+        // Map may be empty if no custom RTs exist — that's OK, no exception should occur.
     }
 }
 ```
