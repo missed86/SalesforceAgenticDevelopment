@@ -1,19 +1,37 @@
 ---
 name: salesforce-metadata-standards
 description: >-
-  Salesforce declarative metadata naming conventions, description standards,
-  and governance rules. Covers custom objects, fields, validation rules, Flows,
-  permission sets, sharing rules, custom labels, page layouts, record types,
-  reports, dashboards, approval processes, queues, and public groups.
-  Use when creating or reviewing Salesforce metadata, custom objects, fields,
-  Flows, permission sets, validation rules, or any declarative configuration.
+  Declarative naming, descriptions, help text, and governance for Salesforce
+  metadata: custom objects and fields, validation rules, record-triggered and
+  autolaunched Flows, subflows, approval processes, permission sets and permission
+  set groups, queues, public groups, sharing rules, layouts, record types, custom
+  labels, reports, and dashboards. Use when authoring or reviewing metadata,
+  Setup changes, or org configuration standards (including Flow API version and
+  active vs draft automation).
+metadata:
+  domain: salesforce-metadata
+  salesforce-era: spring-26
 ---
 
 # Salesforce Metadata Standards
 
 Naming conventions, description requirements, and governance rules for all
 declarative Salesforce metadata. No abbreviations. No ambiguity. Consistent
-across every sandbox and production org.
+across every sandbox and production org. Guidance reflects **Spring '26 era**
+expectations: document Flow **API version**, prefer clear active/inactive
+automation lifecycle, and align declarative names with what Apex and LWC expose
+to users.
+
+## Related skills
+
+- **Runtime security (FLS, sharing, DTOs):** [apex-architecture](../apex-architecture/SKILL.md) — how declarative access interacts with Apex and APIs.
+- **UI consumption of data:** [lwc-best-practices](../lwc-best-practices/SKILL.md) — when metadata choices affect LWC and Experience Cloud.
+
+## Automation at scale (org mindset)
+
+- **Flow complexity:** Large element counts, nested loops, and excessive scheduled paths increase maintenance cost and approach platform limits — favor subflows and clear entry criteria.
+- **Versioning:** Prefer explicit API version and change notes on Flows; avoid silent edits to production-active versions without a rollback story.
+- **Custom Metadata vs Custom Settings:** Prefer Custom Metadata Types for config you deploy with code; use Hierarchy Custom Settings sparingly for true org/user overrides.
 
 ## Universal Rules
 

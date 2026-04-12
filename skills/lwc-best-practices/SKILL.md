@@ -1,16 +1,28 @@
 ---
 name: lwc-best-practices
 description: >-
-  Lightning Web Components best practices covering component architecture,
-  communication patterns, data access, lifecycle hooks, performance optimization,
-  styling, accessibility, error handling, navigation, security, and Jest testing.
-  Use when creating, reviewing, or debugging LWC components in Salesforce.
+  Lightning Web Components: composition, @api, lifecycle, @wire and imperative
+  Apex vs LDS, caching and refresh patterns, LMS, navigation, SLDS 2 and
+  styling hooks, accessibility, error handling, and Jest testing. Covers
+  client-side security expectations (LWS, CSP, static resources, no secrets in
+  the browser). Use when building, refactoring, reviewing, or debugging LWC,
+  Experience Cloud UI, or LWC Jest tests.
+metadata:
+  domain: salesforce-lwc
+  salesforce-era: spring-26
 ---
 
 # Lightning Web Components Best Practices
 
 Modern, performant, accessible LWC patterns. No Aura. No third-party frameworks.
 Aligned with SLDS 2, Lightning Web Security, and Spring '26 standards.
+
+## Related skills
+
+- **Apex layers, DTOs, and server security:** [apex-architecture](../apex-architecture/SKILL.md) — thin controllers, DTOs, sharing/FLS, bulk-safe services for LWC.
+- **Metadata naming and governance:** [salesforce-metadata-standards](../salesforce-metadata-standards/SKILL.md) — labels, objects, fields, and automation naming for UI-facing schema.
+
+**Governor limits:** LWC runs in the browser; SOQL/DML limits apply in Apex invoked from LWC. Prefer fewer round-trips, smaller payloads, and cacheable `@wire` where appropriate; see [performance.md](patterns/performance.md) and Apex skill for bulk patterns.
 
 ## Universal Rules
 
@@ -90,6 +102,7 @@ Is it a simple CRUD form?
 | Data and State | [data-and-state.md](patterns/data-and-state.md) | Wire, imperative Apex, LDS, reactivity |
 | Communication | [communication.md](patterns/communication.md) | Events, LMS, parent-child, navigation |
 | Performance | [performance.md](patterns/performance.md) | Lazy loading, rendering, caching |
+| Security & trust | [security-and-trust.md](patterns/security-and-trust.md) | LWS, CSP, static resources, secrets, DOM boundaries |
 | Styling and Accessibility | [styling-and-a11y.md](patterns/styling-and-a11y.md) | CSS, SLDS 2, ARIA, keyboard navigation |
 | Error Handling | [error-handling.md](patterns/error-handling.md) | Try-catch, toasts, error boundaries |
 | Testing | [testing.md](patterns/testing.md) | Jest setup, mocking wire, DOM assertions |

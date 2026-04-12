@@ -1,20 +1,28 @@
 ---
 name: apex-architecture
 description: >-
-  Apex code architecture patterns, naming conventions, and best practices for
-  Salesforce projects of any size. Pure Apex without frameworks (no fflib, no
-  Flow, no AI). Covers trigger handlers, service/selector/domain/controller layers,
-  LWC Apex controllers, DTOs, async patterns, security, testing, error handling,
-  logging, callouts, REST APIs, bulkification, and governor limit optimization.
-  Use when writing Apex classes, designing Salesforce architecture, creating
-  triggers, services, selectors, controllers, tests, callouts, REST endpoints,
-  LWC Apex integration, or reviewing Apex code quality.
+  Framework-free Apex architecture: layered design (trigger handlers, services,
+  selectors, domains, thin LWC controllers), DTOs, async (Queueable, Batch,
+  Schedulable, Platform Events), callouts and REST, structured errors, logging,
+  and tests with bulkification and governor-limit safety. Covers sharing,
+  CRUD/FLS, USER_MODE, SECURITY_ENFORCED, and SOQL injection avoidance. Use when
+  writing or reviewing Apex, triggers, tests, integrations, or LWC-facing Apex
+  APIs.
+metadata:
+  domain: salesforce-apex
+  stack: framework-free-apex
+  salesforce-era: spring-26
 ---
 
 # Apex Architecture Patterns (Framework-Free)
 
 Pure Apex patterns optimized for projects from small to enterprise scale.
 No external frameworks. No Flow. No AI. Just clean, scalable Apex.
+
+## Related skills
+
+- **LWC UI and client patterns:** [lwc-best-practices](../lwc-best-practices/SKILL.md) — wire, imperative Apex, Jest, SLDS 2, client-side trust boundaries.
+- **Declarative naming and governance:** [salesforce-metadata-standards](../salesforce-metadata-standards/SKILL.md) — objects, fields, Flows, permission sets; keep API design aligned with metadata standards.
 
 ## Quick Decision Tables
 

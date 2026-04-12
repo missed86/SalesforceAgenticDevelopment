@@ -1,13 +1,13 @@
 # Salesforce Agent Skills
 
-Reusable [Agent Skills](https://agentskills.io) for Salesforce development. Each skill is a `SKILL.md` with YAML frontmatter (`name`, `description`) so coding agents can load focused guidance for Apex, LWC, and declarative metadata.
+Reusable [Agent Skills](https://agentskills.io) for Salesforce development. Each skill is a `SKILL.md` with YAML frontmatter (`name`, `description`, optional `metadata`) per the [Agent Skills specification](https://agentskills.io/specification.md). Supporting detail lives in `patterns/` and `standards/` for progressive disclosure.
 
 ## Skills
 
 | Skill | Summary |
 | ----- | ------- |
 | [apex-architecture](skills/apex-architecture/SKILL.md) | Apex architecture, layers, triggers, services, selectors, security, testing, bulkification, and governor limits (framework-free). |
-| [lwc-best-practices](skills/lwc-best-practices/SKILL.md) | Lightning Web Components: architecture, data, lifecycle, performance, accessibility, security, and Jest testing. |
+| [lwc-best-practices](skills/lwc-best-practices/SKILL.md) | Lightning Web Components: architecture, wire/LDS, lifecycle, performance, accessibility, client security (LWS/CSP), and Jest testing. |
 | [salesforce-metadata-standards](skills/salesforce-metadata-standards/SKILL.md) | Declarative metadata naming, descriptions, and governance (objects, fields, Flows, permission sets, and more). |
 
 ## Install with the Skills CLI
@@ -48,11 +48,15 @@ npx skills add . --list
 ```text
 skills/
 ├── apex-architecture/
-│   └── SKILL.md
+│   ├── SKILL.md
+│   ├── patterns/
+│   └── examples/
 ├── lwc-best-practices/
-│   └── SKILL.md
+│   ├── SKILL.md
+│   └── patterns/
 └── salesforce-metadata-standards/
-    └── SKILL.md
+    ├── SKILL.md
+    └── standards/
 ```
 
 ## License
