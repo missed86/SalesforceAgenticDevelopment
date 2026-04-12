@@ -229,6 +229,48 @@ public with sharing class ServiceFactory {
 IPaymentGateway gateway = (IPaymentGateway) ServiceFactory.resolve('PaymentGateway');
 ```
 
+## Record Type Resolution
+
+Never hardcode Record Type IDs — they differ between orgs and sandboxes.
+
+### Recommended: Schema Describe (cached per transaction)
+
+```apex
+public with sharing class RecordTypes {
+
+    public static Id get(SObjectType sot, String developerName) {
+        Schema.RecordTypeInfo info = sot.getDescribe()
+            .getRecordTypeInfosByDeveloperName()
+            .get(developerName);
+        if (info == null) {
+            throw new AppException(
+                'Record Type not found: ' + sot + '.' + developerName
+            );
+        }
+        return info.getRecordTypeId();
+    }
+}
+
+// Usage:
+Id rtId = RecordTypes.get(Case.SObjectType, 'Internal');
+```
+
+### Alternative approaches
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| `Schema.getRecordTypeInfosByDeveloperName()` | No SOQL, cached within transaction | Requires compile-time SObjectType reference |
+| SOQL on `RecordType` table | Works when SObjectType is dynamic | Counts against SOQL limit; cache manually |
+| CMDT mapping table | Decouples code from RT names; deployable | Extra metadata to maintain |
+
+### Anti-Patterns
+
+| Pattern | Problem | Fix |
+|---------|---------|-----|
+| Hardcoded 18-char ID | Breaks across orgs/sandboxes | Use `Schema` describe |
+| Querying `RecordType` in a loop | Governor limit breach | Query once, store in Map |
+| String comparison on `RecordType.Name` (label) | Breaks if admin renames label | Compare on `DeveloperName` |
+
 ## Key Rules
 
 - CMDT > Custom Settings for application configuration
@@ -237,3 +279,4 @@ IPaymentGateway gateway = (IPaymentGateway) ServiceFactory.resolve('PaymentGatew
 - For DI, prefer the dual constructor pattern — simple and testable
 - Use CMDT-based resolution only when you need runtime-swappable implementations
 - Never hardcode IDs, endpoints, thresholds, or feature flags
+- **Record Types**: resolve via `Schema` describe or a reusable utility; never hardcode IDs or compare on label

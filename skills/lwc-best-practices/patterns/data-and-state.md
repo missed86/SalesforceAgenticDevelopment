@@ -332,6 +332,84 @@ await notifyRecordUpdateAvailable([{ recordId: this.recordId }]);
 
 ---
 
+## Record Types in LWC
+
+### Getting Available Record Types
+
+Use `getObjectInfo` to retrieve record type metadata without Apex:
+
+```javascript
+import { LightningElement, wire } from 'lwc';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
+import CASE_OBJECT from '@salesforce/schema/Case';
+
+export default class RecordTypeSelector extends LightningElement {
+    recordTypeOptions = [];
+    selectedRecordTypeId;
+
+    @wire(getObjectInfo, { objectApiName: CASE_OBJECT })
+    handleObjectInfo({ data, error }) {
+        if (data) {
+            const rtInfos = data.recordTypeInfos;
+            this.recordTypeOptions = Object.values(rtInfos)
+                .filter(rt => rt.available && !rt.master)
+                .map(rt => ({ label: rt.name, value: rt.recordTypeId }));
+
+            if (this.recordTypeOptions.length === 1) {
+                this.selectedRecordTypeId = this.recordTypeOptions[0].value;
+            }
+        } else if (error) {
+            this.recordTypeOptions = [];
+        }
+    }
+
+    handleRecordTypeChange(event) {
+        this.selectedRecordTypeId = event.detail.value;
+    }
+}
+```
+
+### Passing Record Type to Forms
+
+```html
+<lightning-combobox
+    label="Record Type"
+    options={recordTypeOptions}
+    value={selectedRecordTypeId}
+    onchange={handleRecordTypeChange}>
+</lightning-combobox>
+
+<template lwc:if={selectedRecordTypeId}>
+    <lightning-record-form
+        object-api-name="Case"
+        record-type-id={selectedRecordTypeId}
+        fields={fields}
+        onsuccess={handleSuccess}>
+    </lightning-record-form>
+</template>
+```
+
+### Getting the Default Record Type
+
+```javascript
+get defaultRecordTypeId() {
+    if (!this.objectInfo) return undefined;
+    return this.objectInfo.defaultRecordTypeId;
+}
+```
+
+### Record Type Decision Table
+
+| Need | Approach |
+|------|----------|
+| List available RTs for a picklist | `getObjectInfo` → filter `recordTypeInfos` |
+| Pre-select default RT | `objectInfo.defaultRecordTypeId` |
+| Show different form layouts per RT | Pass `record-type-id` to `lightning-record-form` |
+| Conditional UI based on RT of existing record | `getRecord` with `RecordTypeId` field, compare against `getObjectInfo` |
+| Create record with specific RT from Apex | Pass RT Id from LWC → Controller → Service (resolve via `Schema` in Apex, see [configuration.md](../../apex-architecture/patterns/configuration.md)) |
+
+---
+
 ## State Patterns
 
 ### Loading / Error / Content Pattern

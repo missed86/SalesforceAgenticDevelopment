@@ -141,6 +141,18 @@ This is the status field.  (says nothing useful)
 
 ## Record Types
 
+### When to Create a Record Type vs a Discriminator Field
+
+| Use a Record Type when | Use a picklist/checkbox field when |
+|------------------------|-----------------------------------|
+| Different **page layouts** per category | Same layout, just filter logic |
+| Different **picklist values** per category | Picklist values are shared |
+| Different **business processes** (e.g. Sales vs Support path) | Only reporting or filtering differs |
+| Users need the **RT selector** on record creation | Users don't need to choose a "type" at creation |
+| Sharing rules, assignment rules, or approvals vary by type | Access rules are identical |
+
+**Rule of thumb:** if you only need to *know* the type, use a field. If you need to *change what the user sees or can do*, use a Record Type.
+
 ### Naming Rules
 
 | Rule | Example | Anti-Pattern |
@@ -161,6 +173,14 @@ Records created for internal stock transfers between warehouses.
 Uses the InternalTransfer page layout (hides shipping cost fields).
 Available status values: Draft, Submitted, Approved, Completed.
 ```
+
+### Governance
+
+- **Limit record types** to meaningful behavioral differences — not every category deserves one.
+- **Document in the object description** which record types exist and why.
+- **In Apex**, resolve IDs via `Schema.SObjectType.*.getRecordTypeInfosByDeveloperName()`, never hardcoded IDs (see [configuration.md](../../apex-architecture/patterns/configuration.md)).
+- **In LWC**, use `getObjectInfo` to list available record types dynamically (see [data-and-state.md](../../lwc-best-practices/patterns/data-and-state.md)).
+- **In Flows**, reference record types by `DeveloperName` via Custom Labels or CMDT — never paste IDs.
 
 ---
 

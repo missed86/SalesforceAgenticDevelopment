@@ -166,6 +166,64 @@ public void beforeInsert(List<Order> newOrders) {
 }
 ```
 
+## Record-Type-Aware Domain Logic
+
+When validation or defaults vary by record type, resolve the `RecordTypeId` via
+`Schema` (never hardcode IDs) and branch inside the same bulk-safe method:
+
+```apex
+public with sharing class CaseDomain {
+
+    private static final Map<String, Id> RT_IDS = new Map<String, Id>();
+
+    private static Id rtId(String developerName) {
+        if (!RT_IDS.containsKey(developerName)) {
+            RT_IDS.put(developerName,
+                Schema.SObjectType.Case
+                    .getRecordTypeInfosByDeveloperName()
+                    .get(developerName)
+                    .getRecordTypeId()
+            );
+        }
+        return RT_IDS.get(developerName);
+    }
+
+    public static void setDefaultsByRecordType(List<Case> records) {
+        Id internalId = rtId('Internal');
+        Id externalId = rtId('External');
+
+        for (Case c : records) {
+            if (c.RecordTypeId == internalId) {
+                if (c.Priority == null) c.Priority = 'Low';
+                if (c.Origin == null)   c.Origin = 'Internal';
+            } else if (c.RecordTypeId == externalId) {
+                if (c.Priority == null) c.Priority = 'Medium';
+                if (c.Origin == null)   c.Origin = 'Web';
+            }
+        }
+    }
+
+    public static void validateByRecordType(List<Case> records) {
+        Id externalId = rtId('External');
+
+        for (Case c : records) {
+            if (c.RecordTypeId == externalId && String.isBlank(c.ContactId)) {
+                c.addError('External cases require a Contact.');
+            }
+        }
+    }
+}
+```
+
+### When to use record-type branching in Domain
+
+| Scenario | Approach |
+|----------|----------|
+| Different defaults per record type | Branch in `setDefaults*` |
+| Different validations per record type | Branch in `validate*` |
+| Completely different business domains sharing an SObject | Consider separate Domain methods per RT, called by the Handler |
+| Only 1 record type or no RT differences | Skip branching — keep it simple |
+
 ## Key Rules
 
 - Domain classes have **no SOQL, no DML** — pure transformation and validation
@@ -175,3 +233,4 @@ public void beforeInsert(List<Order> newOrders) {
 - Keep domain methods **small and focused** — one rule per method
 - Domain is the **only place** where field-level business rules live
 - When the Domain needs related data, the **caller pre-queries and passes it** as a parameter
+- **Never hardcode Record Type IDs** — use `Schema.SObjectType.*.getRecordTypeInfosByDeveloperName()`
