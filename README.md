@@ -12,33 +12,35 @@ Reusable [Agent Skills](https://agentskills.io) for Salesforce development. Each
 
 ## Install with the Skills CLI
 
-Use the open [skills](https://github.com/vercel-labs/skills) CLI (`npx skills add`). Replace `owner/repo` with your GitHub namespace after you publish this repository.
+Use the open [skills](https://github.com/vercel-labs/skills) CLI (`npx skills add`) against this repository:
+
+**Repository:** [missed86/SalesforceAgenticDevelopment](https://github.com/missed86/SalesforceAgenticDevelopment)
 
 ```bash
 # List skills in the repo without installing
-npx skills add owner/repo --list
+npx skills add missed86/SalesforceAgenticDevelopment --list
 
 # Install all discovered skills (interactive; pick agents such as Cursor)
-npx skills add owner/repo
+npx skills add missed86/SalesforceAgenticDevelopment
 
 # Install for Cursor only, non-interactive
-npx skills add owner/repo -a cursor -y
+npx skills add missed86/SalesforceAgenticDevelopment -a cursor -y
 
 # Install specific skills
-npx skills add owner/repo --skill apex-architecture --skill lwc-best-practices
+npx skills add missed86/SalesforceAgenticDevelopment --skill apex-architecture --skill lwc-best-practices
 ```
 
 Other useful forms:
 
 ```bash
-npx skills add https://github.com/owner/repo
-npx skills add https://github.com/owner/repo/tree/main/skills/apex-architecture
+npx skills add https://github.com/missed86/SalesforceAgenticDevelopment
+npx skills add https://github.com/missed86/SalesforceAgenticDevelopment/tree/main/skills/apex-architecture
 ```
 
-For a **local** checkout before publishing:
+From a **local** clone of this repo:
 
 ```bash
-npx skills add /path/to/this/repo --list
+npx skills add . --list
 ```
 
 ## Repository layout
