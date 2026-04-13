@@ -10,6 +10,7 @@ Reusable [Agent Skills](https://agentskills.io) for Salesforce development. Each
 | [lwc-best-practices](skills/lwc-best-practices/SKILL.md) | Lightning Web Components: architecture, wire/LDS, lifecycle, performance, accessibility, client security (LWS/CSP), and Jest testing. |
 | [salesforce-metadata-standards](skills/salesforce-metadata-standards/SKILL.md) | Declarative metadata naming, descriptions, and governance (objects, fields, Flows, permission sets, and more). |
 | [salesforce-foundation-init](skills/salesforce-foundation-init/SKILL.md) | Scaffolds base Apex classes and metadata for a new project: Logger, TriggerControl, AppException, ServiceResponseDto, RecordTypes, TestDataFactory. |
+| [sf-cartographer](skills/sf-cartographer/SKILL.md) | Scans every force-app/ directory and generates (or updates) comprehensive living documentation: architecture, data model, Apex inventory, LWC catalog, automation, security, integrations, and UI config. |
 
 ## Install with the Skills CLI
 
@@ -58,8 +59,11 @@ skills/
 ├── salesforce-metadata-standards/
 │   ├── SKILL.md
 │   └── standards/
-└── salesforce-foundation-init/
-    └── SKILL.md
+├── salesforce-foundation-init/
+│   └── SKILL.md
+└── sf-cartographer/
+    ├── SKILL.md
+    └── scanners/
 ```
 
 ## License
