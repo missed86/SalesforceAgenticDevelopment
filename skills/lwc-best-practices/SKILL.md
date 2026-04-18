@@ -19,6 +19,7 @@ Aligned with SLDS 2, Lightning Web Security, and Spring '26 standards.
 
 ## Related skills
 
+- **Layout preview and SLDS 2 iteration (Cursor browser):** [lwc-preview](../lwc-preview/SKILL.md) — static SLDS-first mocks and handoff specs before wiring data and logic.
 - **Apex layers, DTOs, and server security:** [apex-architecture](../apex-architecture/SKILL.md) — thin controllers, DTOs, sharing/FLS, bulk-safe services for LWC.
 - **Metadata naming and governance:** [salesforce-metadata-standards](../salesforce-metadata-standards/SKILL.md) — labels, objects, fields, and automation naming for UI-facing schema.
 
